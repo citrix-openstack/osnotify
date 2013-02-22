@@ -31,6 +31,12 @@ sudo apt-get install -qy python-pip python-dev
 )
 }
 
+function osnotify_setup
+{
+    sudo pip install -U pyzmq
+    sudo python setup.py install
+}
+
 function osnotify_setup_venv
 {
     [ -e .env ] || virtualenv .env
@@ -44,7 +50,7 @@ function osnotify-ci
     install_zmq_compile_dependencies
     compile_install_zmq
     install_python_zmq_deps
-    osnotify_setup_venv
+    osnotify_setup
 }
 
 function osnotify-develop
