@@ -1,0 +1,4 @@
+osnotify
+========
+
+OpenStack related notifications
