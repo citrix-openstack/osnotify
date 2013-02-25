@@ -27,7 +27,7 @@ function install_python_zmq_deps
 {
 (
 export DEBIAN_FRONTEND=noninteractive
-sudo apt-get install -qy python-pip python-dev
+sudo apt-get install -qy python-pip python-dev python-virtualenv
 )
 }
 
