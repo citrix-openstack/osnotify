@@ -16,9 +16,9 @@ cd "$ZMQ"
 wget http://download.zeromq.org/zeromq-3.2.2.tar.gz
 tar -xzf zeromq-3.2.2.tar.gz
 cd zeromq-3.2.2/
-./configure
+./configure --prefix="$HOME/zeromq"
 make
-sudo make install
+make install
 )
 rm -rf "$ZMQ"
 }
@@ -31,18 +31,25 @@ sudo apt-get install -qy python-pip python-dev
 )
 }
 
-function osnotify_setup
+function setup_pyzmq
 {
-    sudo pip install -U pyzmq
-    sudo python setup.py install
+ZMQ=$(mktemp -d)
+(
+cd "$ZMQ"
+wget https://pypi.python.org/packages/source/p/pyzmq/pyzmq-13.0.0.tar.gz
+tar -xzf pyzmq-13.0.0.tar.gz
+cd pyzmq-13.0.0
+python setup.py configure --zmq="$HOME/zeromq"
+python setup.py install
+)
+rm -rf "$ZMQ"
 }
 
 function osnotify_setup_venv
 {
     [ -e .env ] || virtualenv .env
     . .env/bin/activate
-    pip install -U pyzmq
-    python setup.py develop
+    setup_pyzmq
 }
 
 function osnotify-install
@@ -50,7 +57,8 @@ function osnotify-install
     install_zmq_compile_dependencies
     compile_install_zmq
     install_python_zmq_deps
-    osnotify_setup
+    osnotify_setup_venv
+    python setup.py install
 }
 
 function osnotify-develop
@@ -59,12 +67,12 @@ function osnotify-develop
     compile_install_zmq
     install_python_zmq_deps
     osnotify_setup_venv
+    python setup.py develop
 }
 
 function osnotify-ci
 {
     osnotify-install
-    # Tests should come here
 }
 
 
