@@ -45,7 +45,7 @@ function osnotify_setup_venv
     python setup.py develop
 }
 
-function osnotify-ci
+function osnotify-install
 {
     install_zmq_compile_dependencies
     compile_install_zmq
@@ -60,3 +60,26 @@ function osnotify-develop
     install_python_zmq_deps
     osnotify_setup_venv
 }
+
+function osnotify-ci
+{
+    osnotify-install
+    # Tests should come here
+}
+
+
+if [ "$1" == "develop" ]
+then
+    osnotify-develop
+fi
+
+if [ "$1" == "ci" ]
+then
+    osnotify-ci
+fi
+
+if [ "$1" == "install" ]
+then
+    osnotify-install
+fi
+

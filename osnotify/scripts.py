@@ -39,6 +39,7 @@ class Parser(object):
 def publish():
     parser = Parser("Publish lines of standard input")
     parser.add_host()
+    parser.add_topic()
     args = parser.parse()
 
     context = zmq.Context()
@@ -50,7 +51,7 @@ def publish():
         line = sys.stdin.readline()
         if not line:
             break
-        socket.send(line, zmq.DONTWAIT)
+        socket.send(args.topic + line, zmq.DONTWAIT)
 
     socket.close()
     context.term()
