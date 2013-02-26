@@ -54,6 +54,7 @@ function osnotify_install
     compile_install_zmq "$1"
     osnotify_setup_venv "$1"
     pip install https://github.com/citrix-openstack/osnotify/archive/master.zip
+    sudo "$1/env/bin/osnotify-install-service" "osnotify-proxy" "$(id -un)"
 }
 
 function osnotify_develop
@@ -67,7 +68,6 @@ function osnotify_ci
 {
     install_dependencies
     osnotify_install "$HOME/osnotify"
-    sudo "$HOME/osnotify/env/bin/osnotify-install-service" "osnotify-proxy" "$(id -un)"
 }
 
 
