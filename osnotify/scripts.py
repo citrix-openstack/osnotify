@@ -1,6 +1,8 @@
 import zmq
 import sys
 import argparse
+import textwrap
+
 
 def proxy():
     context = zmq.Context()
@@ -72,3 +74,51 @@ def subscribe():
     while True:
         sys.stdout.write(socket.recv())
         sys.stdout.flush()
+
+
+def create_init_script_for(executable, user, pidfile):
+    return textwrap.dedent("""#!/bin/sh
+    [ "$(id -u)" != "0" ] && {
+        echo "This script must be ran as root" >&2
+        exit 1
+    }
+    case $1 in
+    start)
+        su %(user)s -s /bin/sh -c "nohup %(executable)s > /dev/null 2>&1 < /dev/null & echo \$!" > %(pidfile)s
+        exit 0
+        ;;
+    stop)
+        su %(user)s -s /bin/sh -c "kill `cat %(pidfile)s`" && rm -f %(pidfile)s
+        exit 0
+        ;;
+    esac
+    exit 1
+    """) % dict(executable=executable, user=user, pidfile=pidfile)
+
+
+def get_full_path_for_script(scriptname):
+    import sys
+    import os.path
+
+    return os.path.join(os.path.dirname(sys.executable), scriptname)
+
+
+def install_service():
+    import subprocess
+
+    parser = argparse.ArgumentParser(description='install a service')
+    parser.add_argument('script', help='The script that you want to have as a service')
+    parser.add_argument('user', help='The service account which will run the service')
+
+    args = parser.parse_args()
+
+    initscript_path = '/etc/init.d/' + args.script
+    scriptpath = get_full_path_for_script(args.script)
+
+    with open(initscript_path, 'wb') as initscript:
+        initscript.write(create_init_script_for(
+            scriptpath, args.user, '/var/run/' + args.script))
+        initscript.close()
+
+    subprocess.call(['chmod', '+x', initscript_path])
+    subprocess.call(['update-rc.d', args.script, 'defaults'])
