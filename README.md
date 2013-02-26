@@ -17,10 +17,10 @@ As an example, if you might want to push notifications to the proxy from gerrit:
 to the specified host.
 
 ## Install
-In order to install this software, you need to execute the `tools.sh` script,
+In order to install this software, you need to execute the `setup.sh` script,
 found in this dir. To install the package to `targetdir`:
 
-    ./tools.sh install targetdir
+    ./setup.sh install targetdir
 
 ## Development
 If you would like to develop, specify a directory, where the environment will
@@ -29,10 +29,10 @@ directory.
 
     git clone git@github.com:citrix-openstack/osnotify.git osnotify
     cd osnotify
-    ./tools.sh develop .env
+    ./setup.sh develop .env
 
 ## Testing
 If you have a minimal ubuntu image, and your user have passwordless sudo, just
 execute:
 
-    ./tools.sh ci
+    ./setup.sh ci
