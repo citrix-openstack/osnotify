@@ -67,7 +67,7 @@ function osnotify_ci
 {
     install_dependencies
     osnotify_install "$HOME/osnotify"
-    "$HOME/osnotify/env/bin/osnotify-install-service" "osnotify-proxy" "$(id -un)"
+    sudo "$(type osnotify-install-service)" "osnotify-proxy" "$(id -un)"
 }
 
 
