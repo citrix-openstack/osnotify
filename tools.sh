@@ -1,10 +1,11 @@
 #!/bin/bash
 
-function install_zmq_compile_dependencies
+function install_dependencies
 {
 (
 export DEBIAN_FRONTEND=noninteractive
-sudo apt-get install -qy libtool autoconf automake uuid-dev g++ make
+sudo apt-get install -qy libtool autoconf automake uuid-dev g++ make \
+python-pip python-dev python-virtualenv
 )
 }
 
@@ -16,19 +17,11 @@ cd "$ZMQ"
 wget http://download.zeromq.org/zeromq-3.2.2.tar.gz
 tar -xzf zeromq-3.2.2.tar.gz
 cd zeromq-3.2.2/
-./configure --prefix="$HOME/zeromq"
+./configure --prefix="$1/zmq"
 make
 make install
 )
 rm -rf "$ZMQ"
-}
-
-function install_python_zmq_deps
-{
-(
-export DEBIAN_FRONTEND=noninteractive
-sudo apt-get install -qy python-pip python-dev python-virtualenv
-)
 }
 
 function setup_pyzmq
@@ -39,7 +32,7 @@ cd "$ZMQ"
 wget https://pypi.python.org/packages/source/p/pyzmq/pyzmq-13.0.0.tar.gz
 tar -xzf pyzmq-13.0.0.tar.gz
 cd pyzmq-13.0.0
-python setup.py configure --zmq="$HOME/zeromq"
+python setup.py configure --zmq="$1"
 python setup.py install
 )
 rm -rf "$ZMQ"
@@ -47,47 +40,47 @@ rm -rf "$ZMQ"
 
 function osnotify_setup_venv
 {
-    [ -e .env ] || virtualenv .env
-    . .env/bin/activate
-    setup_pyzmq
+    [ -e "$1/env" ] || virtualenv "$1/env"
+    . "$1/env/bin/activate"
+    setup_pyzmq "$1/zmq"
 }
 
-function osnotify-install
+function osnotify_install
 {
-    install_zmq_compile_dependencies
-    compile_install_zmq
-    install_python_zmq_deps
-    osnotify_setup_venv
-    python setup.py install
+    [ -e "$1" ] && {
+        echo "The given directory [$1] already exists"
+        exit 1
+    }
+    compile_install_zmq "$1"
+    osnotify_setup_venv "$1"
+    pip install https://github.com/citrix-openstack/osnotify/archive/master.zip
 }
 
-function osnotify-develop
+function osnotify_develop
 {
-    install_zmq_compile_dependencies
-    compile_install_zmq
-    install_python_zmq_deps
-    osnotify_setup_venv
+    compile_install_zmq "$1"
+    osnotify_setup_venv "$1"
     python setup.py develop
 }
 
-function osnotify-ci
+function osnotify_ci
 {
-    osnotify-install
+    install_dependencies
+    osnotify_install "$HOME/osnotify"
 }
 
 
 if [ "$1" == "develop" ]
 then
-    osnotify-develop
+    osnotify_develop "$(readlink -f $2)"
 fi
 
 if [ "$1" == "ci" ]
 then
-    osnotify-ci
+    osnotify_ci "$HOME/osnotify"
 fi
 
 if [ "$1" == "install" ]
 then
-    osnotify-install
+    osnotify_install "$(readlink -f $2)"
 fi
-

@@ -17,16 +17,22 @@ As an example, if you might want to push notifications to the proxy from gerrit:
 to the specified host.
 
 ## Install
-To install the package
+In order to install this software, you need to execute the `tools.sh` script,
+found in this dir. To install the package to `targetdir`:
 
-    ./tools.sh install
+    ./tools.sh install targetdir
 
 ## Development
-If you would like to develop:
+If you would like to develop, specify a directory, where the environment will
+be put. This assumes that you have the sources checked out to the current
+directory.
 
-    ./tools.sh develop
+    git clone git@github.com:citrix-openstack/osnotify.git osnotify
+    cd osnotify
+    ./tools.sh develop .env
 
 ## Testing
-If you have a minimal ubuntu image, just execute:
+If you have a minimal ubuntu image, and your user have passwordless sudo, just
+execute:
 
     ./tools.sh ci
