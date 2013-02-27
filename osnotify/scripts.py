@@ -66,6 +66,9 @@ def subscribe():
         sys.stdout.write(socket.recv())
         sys.stdout.flush()
 
+    socket.close()
+    context.term()
+
 
 def create_init_script_for(executable, user, pidfile):
     return textwrap.dedent("""#!/bin/sh
@@ -126,15 +129,30 @@ def gerrit_to_githook():
     parser.add_argument(
         'projectlist',
         help='A file with the list of projects e.g.:openstack/nova')
-    parser.add_argument('--host', dest='host', default='localhost',
-                        help='The host to connect to')
+    parser.add_argument(
+        '--host', dest='host', default='localhost',
+        help='The host to connect to')
+    parser.add_argument(
+        '--topic', dest='topic', default='',
+        help='The topic to subscribe to')
     args = parser.parse_args()
 
     with open(args.projectlist, 'rb') as listfile:
         projects = listfile.read()
 
-    for line in sys.stdin:
+    context = zmq.Context()
+
+    socket = context.socket(zmq.SUB)
+    socket.connect("tcp://%s:6544" % args.host)
+    socket.setsockopt(zmq.SUBSCRIBE, args.topic)
+
+    while True:
+        line = socket.recv()[len(args.topic):].strip()
         msg = gerrit.GerritMessage(line)
         if msg.is_merge and msg.branch == "master" and msg.project in projects:
             payload = json.dumps(gerrit.to_hook_payload(msg))
             urllib2.urlopen(args.url, urllib.urlencode(dict(payload=payload)))
+            print msg.project + " Notified"
+
+    socket.close()
+    context.term()

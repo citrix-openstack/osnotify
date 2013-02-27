@@ -36,3 +36,19 @@ If you have a minimal ubuntu image, and your user have passwordless sudo, just
 execute:
 
     ./setup.sh ci
+
+## A Use-Case
+Have a proxy running on your server, `someserver`:
+
+    osnotify-proxy
+
+From another machine, pipe in the openstack notifications:
+
+    ssh -p 29418 blah@review.openstack.org gerrit stream-events |
+    osnotify-publish --topic "GERRIT:" --host someserver
+
+And create github webhook calls to `someurl`, for all the merge events, if your
+projects are listed in `~/repositories-to-mirror`:
+
+    osnotify-gerrit-to-githook http://someurl ~/repositories-to-mirror \
+    --host someserver --topic "GERRIT:"
