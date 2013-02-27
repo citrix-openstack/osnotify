@@ -24,29 +24,17 @@ def proxy():
     context.term()
 
 
-class Parser(object):
-    def __init__(self, description):
-        self.parser = argparse.ArgumentParser(description=description)
-
-    def add_host(self):
-        self.parser.add_argument(
-            '--host', dest='host', default='localhost',
-            help='The host to connect to')
-
-    def add_topic(self):
-        self.parser.add_argument(
-            '--topic', dest='topic', default='',
-            help='The topic to subscribe to')
-
-    def parse(self):
-        return self.parser.parse_args()
+def parse_args(description):
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('--host', dest='host', default='localhost',
+        help='The host to connect to')
+    parser.add_argument('--topic', dest='topic', default='',
+        help='The topic to subscribe to')
+    return parser.parse_args()
 
 
 def publish():
-    parser = Parser("Publish lines of standard input")
-    parser.add_host()
-    parser.add_topic()
-    args = parser.parse()
+    args = parse_args("Publish lines of standard input")
 
     context = zmq.Context()
 
@@ -64,10 +52,7 @@ def publish():
 
 
 def subscribe():
-    parser = Parser("Publish lines of standard input")
-    parser.add_host()
-    parser.add_topic()
-    args = parser.parse()
+    args = parse_args("Publish lines of standard input")
 
     context = zmq.Context()
 
@@ -132,6 +117,7 @@ def gerrit_to_githook():
     parser = argparse.ArgumentParser(description='Post github webhook notifications')
     parser.add_argument('url', help='The url to receive the post hooks')
     parser.add_argument('projectlist', help='A file with the list of projects e.g.:openstack/nova')
+    parser.add_argument('--host', dest='host', default='localhost', help='The host to connect to')
     args = parser.parse_args()
 
     with open(args.projectlist, 'rb') as listfile:
