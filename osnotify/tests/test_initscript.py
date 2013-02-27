@@ -41,7 +41,8 @@ def create_init_script_for(daemon, **kwargs):
     with tmpf() as pidfile:
         args = dict(pidfile=pidfile)
         args.update(**kwargs)
-        return scripts.create_init_script_for(daemon, getpass.getuser(), **args)
+        return scripts.create_init_script_for(
+            daemon, getpass.getuser(), **args)
 
 
 class TestTempScript(unittest.TestCase):
@@ -51,8 +52,8 @@ class TestTempScript(unittest.TestCase):
 
     def test_printing_out_something(self):
         with tempfile.NamedTemporaryFile(delete=False) as f:
-            with tempscript('echo "I was executed" > ' + f.name) as printer_script:
-                result = subprocess.call([printer_script])
+            with tempscript('echo "I was executed" > ' + f.name) as srvc:
+                result = subprocess.call([srvc])
                 self.assertEquals(0, result)
 
 
@@ -98,7 +99,8 @@ class TestInitScriptCreation(unittest.TestCase):
             initscript_contents = create_init_script_for(daemon)
 
             with tempexecutable(initscript_contents) as starter:
-                proc = subprocess.Popen(['sudo', starter, 'start'], stdout=subprocess.PIPE)
+                proc = subprocess.Popen(
+                    ['sudo', starter, 'start'], stdout=subprocess.PIPE)
                 proc.wait()
                 self.assertEquals("", proc.stdout.read())
 
@@ -107,7 +109,8 @@ class TestInitScriptCreation(unittest.TestCase):
             initscript_contents = create_init_script_for(daemon)
 
             with tempexecutable(initscript_contents) as starter:
-                proc = subprocess.Popen(['sudo', starter, 'start'], stderr=subprocess.PIPE)
+                proc = subprocess.Popen(
+                    ['sudo', starter, 'start'], stderr=subprocess.PIPE)
                 proc.wait()
                 self.assertEquals("", proc.stderr.read())
 
@@ -116,10 +119,12 @@ class TestInitScriptCreation(unittest.TestCase):
             initscript_contents = create_init_script_for(daemon)
 
             with tempexecutable(initscript_contents) as starter:
-                proc = subprocess.Popen([starter, 'start'], stderr=subprocess.PIPE)
+                proc = subprocess.Popen(
+                    [starter, 'start'], stderr=subprocess.PIPE)
                 proc.wait()
                 self.assertEquals(1, proc.returncode)
-                self.assertTrue("This script must be ran as root" in proc.stderr.read())
+                self.assertTrue(
+                    "This script must be ran as root" in proc.stderr.read())
 
     def test_script_runs_as_specified_user(self):
         with tmpf() as somefile:
@@ -136,7 +141,8 @@ class TestInitScriptCreation(unittest.TestCase):
     def test_daemon_is_stopped(self):
         with tmpf() as somefile:
             with tempscript("sleep 10") as daemon:
-                initscript_contents = create_init_script_for(daemon, pidfile=somefile)
+                initscript_contents = create_init_script_for(
+                    daemon, pidfile=somefile)
 
                 with tempexecutable(initscript_contents) as starter:
                     proc = subprocess.Popen(['sudo', starter, 'start'])

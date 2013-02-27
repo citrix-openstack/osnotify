@@ -26,9 +26,11 @@ def proxy():
 
 def parse_args(description):
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('--host', dest='host', default='localhost',
+    parser.add_argument(
+        '--host', dest='host', default='localhost',
         help='The host to connect to')
-    parser.add_argument('--topic', dest='topic', default='',
+    parser.add_argument(
+        '--topic', dest='topic', default='',
         help='The topic to subscribe to')
     return parser.parse_args()
 
@@ -73,7 +75,9 @@ def create_init_script_for(executable, user, pidfile):
     }
     case $1 in
     start)
-        su %(user)s -s /bin/sh -c "nohup %(executable)s > /dev/null 2>&1 < /dev/null & echo \$!" > %(pidfile)s
+        su %(user)s -s /bin/sh -c \\
+        "nohup %(executable)s > /dev/null 2>&1 < /dev/null & echo \$!" \\
+        > %(pidfile)s
         exit 0
         ;;
     stop)
@@ -96,8 +100,10 @@ def install_service():
     import subprocess
 
     parser = argparse.ArgumentParser(description='install a service')
-    parser.add_argument('script', help='The script that you want to have as a service')
-    parser.add_argument('user', help='The service account which will run the service')
+    parser.add_argument(
+        'script', help='The script that you want to have as a service')
+    parser.add_argument(
+        'user', help='The service account which will run the service')
 
     args = parser.parse_args()
 
@@ -114,10 +120,14 @@ def install_service():
 
 
 def gerrit_to_githook():
-    parser = argparse.ArgumentParser(description='Post github webhook notifications')
+    parser = argparse.ArgumentParser(
+        description='Post github webhook notifications')
     parser.add_argument('url', help='The url to receive the post hooks')
-    parser.add_argument('projectlist', help='A file with the list of projects e.g.:openstack/nova')
-    parser.add_argument('--host', dest='host', default='localhost', help='The host to connect to')
+    parser.add_argument(
+        'projectlist',
+        help='A file with the list of projects e.g.:openstack/nova')
+    parser.add_argument('--host', dest='host', default='localhost',
+                        help='The host to connect to')
     args = parser.parse_args()
 
     with open(args.projectlist, 'rb') as listfile:

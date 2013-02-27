@@ -14,6 +14,7 @@ merge_commit = """
 
 invalid_message = "blah"
 
+
 class TestGerritMessage(unittest.TestCase):
     def test_invalid_message(self):
         go = gerrit.GerritMessage(invalid_message)
