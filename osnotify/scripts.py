@@ -2,6 +2,10 @@ import zmq
 import sys
 import argparse
 import textwrap
+from osnotify import gerrit
+import urllib2
+import json
+import urllib
 
 
 def proxy():
@@ -122,3 +126,19 @@ def install_service():
 
     subprocess.call(['chmod', '+x', initscript_path])
     subprocess.call(['update-rc.d', args.script, 'defaults'])
+
+
+def gerrit_to_githook():
+    parser = argparse.ArgumentParser(description='Post github webhook notifications')
+    parser.add_argument('url', help='The url to receive the post hooks')
+    parser.add_argument('projectlist', help='A file with the list of projects e.g.:openstack/nova')
+    args = parser.parse_args()
+
+    with open(args.projectlist, 'rb') as listfile:
+        projects = listfile.read()
+
+    for line in sys.stdin:
+        msg = gerrit.GerritMessage(line)
+        if msg.is_merge and msg.branch == "master" and msg.project in projects:
+            payload = json.dumps(gerrit.to_hook_payload(msg))
+            urllib2.urlopen(args.url, urllib.urlencode(dict(payload=payload)))

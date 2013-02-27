@@ -12,10 +12,12 @@ merge_commit = """
 }
 """
 
-class TestToGitHook(unittest.TestCase):
-    def test_is_valid(self):
-        go = gerrit.GerritMessage(merge_commit)
-        self.assertTrue(go.valid)
+invalid_message = "blah"
+
+class TestGerritMessage(unittest.TestCase):
+    def test_invalid_message(self):
+        go = gerrit.GerritMessage(invalid_message)
+        self.assertEquals('unknown', go.branch)
 
     def test_is_merge(self):
         go = gerrit.GerritMessage(merge_commit)
@@ -37,6 +39,8 @@ class TestToGitHook(unittest.TestCase):
         go = gerrit.GerritMessage(merge_commit)
         self.assertEquals('master', go.branch)
 
+
+class TestToHookPayload(unittest.TestCase):
     def test_repo_name(self):
         go = gerrit.GerritMessage(merge_commit)
         payload = gerrit.to_hook_payload(go)
@@ -54,3 +58,9 @@ class TestToGitHook(unittest.TestCase):
         payload = gerrit.to_hook_payload(go)
 
         self.assertEquals('refs/heads/master', payload['ref'])
+
+    def test_invalid(self):
+        go = gerrit.GerritMessage("blah")
+        payload = gerrit.to_hook_payload(go)
+
+        self.assertTrue(payload is None)

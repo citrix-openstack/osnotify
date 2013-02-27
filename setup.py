@@ -10,7 +10,8 @@ setup(
             'osnotify-proxy = osnotify.scripts:proxy',
             'osnotify-subscribe = osnotify.scripts:subscribe',
             'osnotify-publish = osnotify.scripts:publish',
-            'osnotify-install-service = osnotify.scripts:install_service'
+            'osnotify-install-service = osnotify.scripts:install_service',
+            'osnotify-gerrit-to-githook = osnotify.scripts:gerrit_to_githook'
         ]
     }
 )

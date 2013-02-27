@@ -2,15 +2,18 @@ import json
 
 
 def to_hook_payload(message):
-    return dict(
-        ref='refs/heads/' + message.branch,
-        repository=dict(
-            name=message.repo,
-            owner=dict(
-                name=message.user
+    try:
+        return dict(
+            ref='refs/heads/' + message.branch,
+            repository=dict(
+                name=message.repo,
+                owner=dict(
+                    name=message.user
+                )
             )
         )
-    )
+    except:
+        return None
 
 
 class GerritMessage(object):
@@ -25,16 +28,8 @@ class GerritMessage(object):
         return self._message
 
     @property
-    def valid(self):
-        try:
-            _ignore = self.message
-            return True
-        except:
-            return False
-
-    @property
     def is_merge(self):
-        return self.message.get('type', 'unknown') == 'change-merged'
+        return self._value_of('type') == 'change-merged'
 
     @property
     def project(self):
@@ -45,10 +40,13 @@ class GerritMessage(object):
         return self._value_of('change', 'branch')
 
     def _value_of(self, *keys):
-        msg = self.message
-        for key in keys:
-            msg = msg[key]
-        return msg
+        try:
+            msg = self.message
+            for key in keys:
+                msg = msg[key]
+            return msg
+        except:
+            return 'unknown'
 
     @property
     def repo(self):
