@@ -6,6 +6,7 @@ from osnotify import gerrit
 import urllib2
 import json
 import urllib
+import datetime
 
 
 def proxy():
@@ -135,10 +136,26 @@ def gerrit_to_githook():
     parser.add_argument(
         '--topic', dest='topic', default='',
         help='The topic to subscribe to')
+    parser.add_argument(
+        '--logfile', dest='logfile',
+        help='Logfile to use')
     args = parser.parse_args()
 
     with open(args.projectlist, 'rb') as listfile:
         projects = listfile.read()
+
+    if args.logfile:
+        def log(msg):
+            logline = str(datetime.datetime.now()) + " " + msg + '\n'
+
+            if args.logfile == '-':
+                sys.stdout.write(logline)
+            else:
+                with open(args.logfile, 'a') as logfile:
+                    logfile.write(logline)
+    else:
+        def log(msg):
+            pass
 
     context = zmq.Context()
 
@@ -152,7 +169,9 @@ def gerrit_to_githook():
         if msg.is_merge and msg.branch == "master" and msg.project in projects:
             payload = json.dumps(gerrit.to_hook_payload(msg))
             urllib2.urlopen(args.url, urllib.urlencode(dict(payload=payload)))
-            print msg.project + " Notified"
+            log("notified " + msg.project + ":" + line)
+        else:
+            log("skipped:" + line)
 
     socket.close()
     context.term()
