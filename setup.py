@@ -11,7 +11,8 @@ setup(
             'osnotify-subscribe = osnotify.scripts:subscribe',
             'osnotify-publish = osnotify.scripts:publish',
             'osnotify-install-service = osnotify.scripts:install_service',
-            'osnotify-gerrit-to-githook = osnotify.scripts:gerrit_to_githook'
+            'osnotify-gerrit-to-githook = osnotify.scripts:gerrit_to_githook',
+            'generate-initscript = osnotify.scripts:generate_initscript',
         ]
     }
 )

@@ -70,7 +70,7 @@ def subscribe():
     context.term()
 
 
-def create_init_script_for(executable, user, pidfile):
+def create_init_script_for(executable, user, pidfile, arguments=""):
     return textwrap.dedent("""#!/bin/sh
     [ "$(id -u)" != "0" ] && {
         echo "This script must be ran as root" >&2
@@ -79,7 +79,7 @@ def create_init_script_for(executable, user, pidfile):
     case $1 in
     start)
         su %(user)s -s /bin/sh -c \\
-        "nohup %(executable)s > /dev/null 2>&1 < /dev/null & echo \$!" \\
+        "nohup %(executable)s %(arguments)s> /dev/null 2>&1 < /dev/null & echo \$!" \\
         > %(pidfile)s
         exit 0
         ;;
@@ -89,7 +89,7 @@ def create_init_script_for(executable, user, pidfile):
         ;;
     esac
     exit 1
-    """) % dict(executable=executable, user=user, pidfile=pidfile)
+    """) % dict(executable=executable, user=user, pidfile=pidfile, arguments=arguments)
 
 
 def get_full_path_for_script(scriptname):
@@ -156,3 +156,22 @@ def gerrit_to_githook():
 
     socket.close()
     context.term()
+
+
+def generate_initscript():
+    import os
+
+    parser = argparse.ArgumentParser(description='Generate an initscript')
+    parser.add_argument(
+        'script', help='Path to the executable you want to daemonize')
+    parser.add_argument(
+        '--arguments', help='Arguments for the executable', default="")
+    parser.add_argument(
+        'user', help='The service account which will run the service')
+
+    args = parser.parse_args()
+
+    print create_init_script_for(args.script, args.user, os.path.join(
+        "/", "var", "run", os.path.basename(args.script) + ".pid"),
+        args.arguments
+        )
