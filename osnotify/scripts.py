@@ -108,6 +108,8 @@ def install_service():
         'script', help='The script that you want to have as a service')
     parser.add_argument(
         'user', help='The service account which will run the service')
+    parser.add_argument(
+        '--arguments', help='Arguments for the executable', default="")
 
     args = parser.parse_args()
 
@@ -116,7 +118,7 @@ def install_service():
 
     with open(initscript_path, 'wb') as initscript:
         initscript.write(create_init_script_for(
-            scriptpath, args.user, '/var/run/' + args.script))
+            scriptpath, args.user, '/var/run/' + args.script, args.arguments))
         initscript.close()
 
     subprocess.call(['chmod', '+x', initscript_path])
